@@ -5,6 +5,9 @@
 - Shelp - The tool for creating a new detection model.  
 - A project presentation.
 
+#### External library :  
+- JTransforms (https://github.com/wendykierp/JTransforms)  
+
 #### Google Play :  
 https://play.google.com/store/apps/details?id=com.tortillum.signalid
 
