@@ -2,7 +2,7 @@
 
 #### Contains :  
 - The source code of the Android application and the identification algorithm.  
-- The tool for creating a new detection model.  
+- Shelp - The tool for creating a new detection model.  
 - A project presentation.
 
 #### Google Play :  
