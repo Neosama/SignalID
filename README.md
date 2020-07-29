@@ -10,3 +10,6 @@ https://play.google.com/store/apps/details?id=com.tortillum.signalid
 
 F-Droid :  
 TODO
+
+License :  
+GNU General Public License v3.0
