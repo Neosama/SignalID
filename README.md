@@ -1,5 +1,7 @@
 # SignalID - Automatic Radio Signal Identification
 
+![ScreenShot](https://raw.githubusercontent.com/Neosama/SignalID/master/img_1.PNG)
+
 #### Contains :  
 - The source code of the Android application and the identification algorithm.  
 - Shelp - The tool for creating a new detection model.  
@@ -14,5 +16,4 @@ https://play.google.com/store/apps/details?id=com.tortillum.signalid
 #### F-Droid :  
 TODO
 
-#### License :  
-GNU General Public License v3.0
+This project is licensed under the GNU General Public License v3.0
