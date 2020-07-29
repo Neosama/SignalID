@@ -1,6 +1,6 @@
 # SignalID - Automatic Radio Signal Identification
 
-![ScreenShot](https://raw.githubusercontent.com/Neosama/SignalID/master/img_1.PNG)
+![large](https://raw.githubusercontent.com/Neosama/SignalID/master/large_banniere.png)
 
 #### Contains :  
 - The source code of the Android application and the identification algorithm.  
