@@ -3,7 +3,7 @@
 #### Contains :  
 - The source code of the Android application and the identification algorithm.  
 - Shelp - The tool for creating a new detection model.  
-- A project presentation.
+- A project presentation. (in /docs)
 
 #### External library :  
 - JTransforms (https://github.com/wendykierp/JTransforms)  
