@@ -3,7 +3,7 @@
 #### Contains :  
 - The source code of the Android application and the identification algorithm.  
 - Shelp - The tool for creating a new detection model.  
-- A project presentation. (in /docs)
+- <a href="https://github.com/Neosama/SignalID/blob/master/docs/SignalID_V1_2.pdf">A project presentation</a>
 
 #### External library :  
 - JTransforms (https://github.com/wendykierp/JTransforms)  
