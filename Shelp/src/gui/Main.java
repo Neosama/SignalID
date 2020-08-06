@@ -49,6 +49,8 @@ import tool.T_SFFT;
 
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
+import javax.swing.JList;
+import javax.swing.JCheckBox;
 
 public class Main {
 
@@ -59,7 +61,7 @@ public class Main {
 
 	private boolean modeFFT = true;
 	private boolean modeSFFT = false;
-	private JTextField textNbTop;
+	private int top = 8;
 
 	/**
 	 * Launch the application.
@@ -89,7 +91,7 @@ public class Main {
 	 */
 	private void initialize() {
 		frmSelp = new JFrame();
-		frmSelp.setTitle("Shelp");
+		frmSelp.setTitle("Shelp V1.1");
 		frmSelp.setBounds(100, 100, 450, 300);
 		frmSelp.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -116,11 +118,24 @@ public class Main {
 
 		JMenu mnTop = new JMenu("Top");
 		menuBar.add(mnTop);
-
-		textNbTop = new JTextField();
-		textNbTop.setText("16");
-		mnTop.add(textNbTop);
-		textNbTop.setColumns(10);
+		
+		JCheckBoxMenuItem chckbxmntmTop8 = new JCheckBoxMenuItem("8", true);
+		mnTop.add(chckbxmntmTop8);
+		
+		JCheckBoxMenuItem chckbxmntmTop16 = new JCheckBoxMenuItem("16");
+		mnTop.add(chckbxmntmTop16);
+		
+		JCheckBoxMenuItem chckbxmntmTop32 = new JCheckBoxMenuItem("32");
+		mnTop.add(chckbxmntmTop32);
+		
+		JCheckBoxMenuItem chckbxmntmTop64 = new JCheckBoxMenuItem("64");
+		mnTop.add(chckbxmntmTop64);
+		
+		JCheckBoxMenuItem chckbxmntmTop128 = new JCheckBoxMenuItem("128");
+		mnTop.add(chckbxmntmTop128);
+		
+		JCheckBoxMenuItem chckbxmntmTop256 = new JCheckBoxMenuItem("256");
+		mnTop.add(chckbxmntmTop256);
 
 		chckbxmntmFFT.addActionListener(new ActionListener() {
 			@Override
@@ -139,6 +154,90 @@ public class Main {
 				chckbxmntmFFT.setSelected(modeFFT);
 			}
 		});
+		
+		chckbxmntmTop8.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				top = 8;
+				
+				//chckbxmntmTop8.setSelected(false);
+				chckbxmntmTop16.setSelected(false);
+				chckbxmntmTop32.setSelected(false);
+				chckbxmntmTop64.setSelected(false);
+				chckbxmntmTop128.setSelected(false);
+				chckbxmntmTop256.setSelected(false);
+			}
+		});
+		
+		chckbxmntmTop16.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				top = 16;
+				
+				chckbxmntmTop8.setSelected(false);
+				//chckbxmntmTop16.setSelected(false);
+				chckbxmntmTop32.setSelected(false);
+				chckbxmntmTop64.setSelected(false);
+				chckbxmntmTop128.setSelected(false);
+				chckbxmntmTop256.setSelected(false);
+			}
+		});
+		
+		chckbxmntmTop32.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				top = 32;
+				
+				chckbxmntmTop8.setSelected(false);
+				chckbxmntmTop16.setSelected(false);
+				//chckbxmntmTop32.setSelected(false);
+				chckbxmntmTop64.setSelected(false);
+				chckbxmntmTop128.setSelected(false);
+				chckbxmntmTop256.setSelected(false);
+			}
+		});
+		
+		chckbxmntmTop64.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				top = 64;
+				
+				chckbxmntmTop8.setSelected(false);
+				chckbxmntmTop16.setSelected(false);
+				chckbxmntmTop32.setSelected(false);
+				//chckbxmntmTop64.setSelected(false);
+				chckbxmntmTop128.setSelected(false);
+				chckbxmntmTop256.setSelected(false);
+			}
+		});
+		
+		chckbxmntmTop128.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				top = 128;
+				
+				chckbxmntmTop8.setSelected(false);
+				chckbxmntmTop16.setSelected(false);
+				chckbxmntmTop32.setSelected(false);
+				chckbxmntmTop64.setSelected(false);
+				//chckbxmntmTop128.setSelected(false);
+				chckbxmntmTop256.setSelected(false);
+			}
+		});
+		
+		chckbxmntmTop256.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				top = 256;
+				
+				chckbxmntmTop8.setSelected(false);
+				chckbxmntmTop16.setSelected(false);
+				chckbxmntmTop32.setSelected(false);
+				chckbxmntmTop64.setSelected(false);
+				chckbxmntmTop128.setSelected(false);
+				//chckbxmntmTop256.setSelected(false);
+			}
+		});
 
 		JTextArea textArea = new JTextArea();
 		textArea.setLineWrap(true);
@@ -152,8 +251,8 @@ public class Main {
 				JFileChooser chooser = new JFileChooser();
 				int returnVal = chooser.showOpenDialog(null);
 				if(returnVal == JFileChooser.APPROVE_OPTION) {
-					int top = Integer.getInteger(textNbTop.getText());
-
+					
+					
 					try {
 						if(modeFFT) {
 							t_fft = new T_FFT(chooser.getSelectedFile().getPath(), top);
