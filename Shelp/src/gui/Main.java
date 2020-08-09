@@ -34,23 +34,14 @@ import java.nio.file.Paths;
 
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
-import javax.swing.JPanel;
 import java.awt.BorderLayout;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFileChooser;
-import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
-import javax.swing.JToggleButton;
-import javax.swing.filechooser.FileNameExtensionFilter;
 
 import tool.T_FFT;
 import tool.T_SFFT;
-
-import javax.swing.JRadioButton;
-import javax.swing.JTextField;
-import javax.swing.JList;
-import javax.swing.JCheckBox;
 
 public class Main {
 
@@ -59,6 +50,7 @@ public class Main {
 	private T_FFT t_fft;
 	private T_SFFT t_sfft;
 
+	private String pathFile = "";
 	private boolean modeFFT = true;
 	private boolean modeSFFT = false;
 	private int top = 8;
@@ -91,6 +83,7 @@ public class Main {
 	 */
 	private void initialize() {
 		frmSelp = new JFrame();
+		frmSelp.setResizable(false);
 		frmSelp.setTitle("Shelp V1.1");
 		frmSelp.setBounds(100, 100, 450, 300);
 		frmSelp.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -118,24 +111,36 @@ public class Main {
 
 		JMenu mnTop = new JMenu("Top");
 		menuBar.add(mnTop);
-		
+
 		JCheckBoxMenuItem chckbxmntmTop8 = new JCheckBoxMenuItem("8", true);
 		mnTop.add(chckbxmntmTop8);
-		
+
 		JCheckBoxMenuItem chckbxmntmTop16 = new JCheckBoxMenuItem("16");
 		mnTop.add(chckbxmntmTop16);
-		
+
 		JCheckBoxMenuItem chckbxmntmTop32 = new JCheckBoxMenuItem("32");
 		mnTop.add(chckbxmntmTop32);
-		
+
 		JCheckBoxMenuItem chckbxmntmTop64 = new JCheckBoxMenuItem("64");
 		mnTop.add(chckbxmntmTop64);
-		
+
 		JCheckBoxMenuItem chckbxmntmTop128 = new JCheckBoxMenuItem("128");
 		mnTop.add(chckbxmntmTop128);
-		
+
 		JCheckBoxMenuItem chckbxmntmTop256 = new JCheckBoxMenuItem("256");
 		mnTop.add(chckbxmntmTop256);
+
+		JMenu mnDetector = new JMenu("Detector");
+		menuBar.add(mnDetector);
+
+		JMenuItem mntmD1_TONES = new JMenuItem("1-TONES");
+		mnDetector.add(mntmD1_TONES);
+
+		JMenuItem mntmD2_TONES = new JMenuItem("2-TONES");
+		mnDetector.add(mntmD2_TONES);
+
+		JMenuItem mntmD2_SANDWICH = new JMenuItem("2-SANDWICH");
+		mnDetector.add(mntmD2_SANDWICH);
 
 		chckbxmntmFFT.addActionListener(new ActionListener() {
 			@Override
@@ -154,12 +159,12 @@ public class Main {
 				chckbxmntmFFT.setSelected(modeFFT);
 			}
 		});
-		
+
 		chckbxmntmTop8.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				top = 8;
-				
+
 				//chckbxmntmTop8.setSelected(false);
 				chckbxmntmTop16.setSelected(false);
 				chckbxmntmTop32.setSelected(false);
@@ -168,12 +173,12 @@ public class Main {
 				chckbxmntmTop256.setSelected(false);
 			}
 		});
-		
+
 		chckbxmntmTop16.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				top = 16;
-				
+
 				chckbxmntmTop8.setSelected(false);
 				//chckbxmntmTop16.setSelected(false);
 				chckbxmntmTop32.setSelected(false);
@@ -182,12 +187,12 @@ public class Main {
 				chckbxmntmTop256.setSelected(false);
 			}
 		});
-		
+
 		chckbxmntmTop32.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				top = 32;
-				
+
 				chckbxmntmTop8.setSelected(false);
 				chckbxmntmTop16.setSelected(false);
 				//chckbxmntmTop32.setSelected(false);
@@ -196,12 +201,12 @@ public class Main {
 				chckbxmntmTop256.setSelected(false);
 			}
 		});
-		
+
 		chckbxmntmTop64.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				top = 64;
-				
+
 				chckbxmntmTop8.setSelected(false);
 				chckbxmntmTop16.setSelected(false);
 				chckbxmntmTop32.setSelected(false);
@@ -210,12 +215,12 @@ public class Main {
 				chckbxmntmTop256.setSelected(false);
 			}
 		});
-		
+
 		chckbxmntmTop128.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				top = 128;
-				
+
 				chckbxmntmTop8.setSelected(false);
 				chckbxmntmTop16.setSelected(false);
 				chckbxmntmTop32.setSelected(false);
@@ -224,12 +229,12 @@ public class Main {
 				chckbxmntmTop256.setSelected(false);
 			}
 		});
-		
+
 		chckbxmntmTop256.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				top = 256;
-				
+
 				chckbxmntmTop8.setSelected(false);
 				chckbxmntmTop16.setSelected(false);
 				chckbxmntmTop32.setSelected(false);
@@ -251,14 +256,14 @@ public class Main {
 				JFileChooser chooser = new JFileChooser();
 				int returnVal = chooser.showOpenDialog(null);
 				if(returnVal == JFileChooser.APPROVE_OPTION) {
-					
-					
+					pathFile = chooser.getSelectedFile().getPath();
+
 					try {
 						if(modeFFT) {
-							t_fft = new T_FFT(chooser.getSelectedFile().getPath(), top);
+							t_fft = new T_FFT(pathFile, top);
 							textArea.setText(t_fft.get());
 						} else {
-							t_sfft = new T_SFFT(chooser.getSelectedFile().getPath(), top);
+							t_sfft = new T_SFFT(pathFile, top);
 							textArea.setText(t_sfft.get());
 						}
 
@@ -291,6 +296,72 @@ public class Main {
 					}
 				}
 
+			}
+		});
+
+		mntmD1_TONES.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+
+				String mode = "";
+				if(modeFFT)
+					mode = "FFT";
+				else
+					mode = "SFFT";
+
+				if(pathFile == "") {
+					textArea.setText("Please Select a File");
+				} else {
+
+					String[] parameters = {pathFile,mode,String.valueOf(top), "D1_TONES"};
+
+					Detector detector = new Detector();
+					detector.main(parameters);
+				}
+			}
+		});
+		
+		mntmD2_TONES.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+
+				String mode = "";
+				if(modeFFT)
+					mode = "FFT";
+				else
+					mode = "SFFT";
+
+				if(pathFile == "") {
+					textArea.setText("Please Select a File");
+				} else {
+
+					String[] parameters = {pathFile,mode,String.valueOf(top), "D2_TONES"};
+
+					Detector detector = new Detector();
+					detector.main(parameters);
+				}
+			}
+		});
+		
+		mntmD2_SANDWICH.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+
+				String mode = "";
+				if(modeFFT)
+					mode = "FFT";
+				else
+					mode = "SFFT";
+
+				if(pathFile == "") {
+					textArea.setText("Please Select a File");
+				} else {
+
+					String[] parameters = {pathFile,mode,String.valueOf(top), "D2_SANDWICH"};
+
+					Detector detector = new Detector();
+					detector.main(parameters);
+				}
 			}
 		});
 	}

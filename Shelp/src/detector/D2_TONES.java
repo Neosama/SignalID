@@ -26,6 +26,8 @@ public class D2_TONES {
 	private boolean find_frequencie_A = false;	
 	private boolean find_frequencie_B = false;
 
+	private int find_sfft = 0;
+
 	public D2_TONES(int frequencie_A, int frequencie_B, int marginError, int topA, int sampleRate, int n_fft, Pair[] listFqs) {
 		MARGIN_ERROR = marginError;
 
@@ -53,9 +55,46 @@ public class D2_TONES {
 			}
 		}
 	}
-	
-	public boolean getState() {
+
+	public D2_TONES(int frequencie_A, int frequencie_B, int marginError, String strListFqs) {
+		MARGIN_ERROR = marginError;
+
+		String[] lines = strListFqs.split(System.getProperty("line.separator"));
+		for(int i = 0; i < lines.length; i++) {
+			if(!lines[i].contains("=")) {
+				int fq = Integer.valueOf(lines[i]);
+
+				Range fq_range = new Range(frequencie_A, MARGIN_ERROR, 0);
+				int[] tmp_range = fq_range.get();
+				for(int j = 0; j < tmp_range.length; j++) {
+					if(fq == tmp_range[j]) {
+						find_frequencie_A = true;
+					}
+				}
+
+				fq_range = new Range(frequencie_B, MARGIN_ERROR, 0);
+				tmp_range = fq_range.get();
+				for(int j = 0; j < tmp_range.length; j++) {
+					if(fq == tmp_range[j]) {
+						find_frequencie_B = true;
+					}
+				}
+
+				if(find_frequencie_A && find_frequencie_B)
+					find_sfft++;
+			}
+		}
+	}
+
+	public boolean check() {
+		if(find_sfft >= 1)
+			return true;
+
 		return find_frequencie_A && find_frequencie_B;
+	}
+
+	public int getScoreSfft() {
+		return find_sfft;
 	}
 
 }

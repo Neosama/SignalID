@@ -21,30 +21,59 @@ import salome.Pair;
 import salome.Range;
 
 public class D1_TONES {
-    private int MARGIN_ERROR = 5; // in Hertz
+	private int MARGIN_ERROR = 5; // in Hertz
 
-    private boolean find_frequencie_A = false;
+	private boolean find_frequencie_A = false;
 
-    public D1_TONES(int frequencie_A, int marginError, int topA, int sampleRate, int n_fft, Pair[] listFqs) {
-        MARGIN_ERROR = marginError;
+	private int find_sfft = 0;
 
-        for(int i = 0; i < listFqs.length; i++) {
-            int fq = listFqs[i].index * sampleRate / n_fft;
+	public D1_TONES(int frequencie_A, int marginError, int topA, int sampleRate, int n_fft, Pair[] listFqs) {
+		MARGIN_ERROR = marginError;
 
-            Range fq_range = new Range(frequencie_A, MARGIN_ERROR, 0);
-            int[] tmp_range = fq_range.get();
-            for(int j = 0; j < tmp_range.length; j++) {
-                if(i < topA) {
-                    if(fq == tmp_range[j]) {
-                        find_frequencie_A = true;
-                    }
-                }
-            }
-        }
-    }
+		for(int i = 0; i < listFqs.length; i++) {
+			int fq = listFqs[i].index * sampleRate / n_fft;
 
-    public boolean check() {
-        return find_frequencie_A;
-    }
+			Range fq_range = new Range(frequencie_A, MARGIN_ERROR, 0);
+			int[] tmp_range = fq_range.get();
+			for(int j = 0; j < tmp_range.length; j++) {
+				if(i < topA) {
+					if(fq == tmp_range[j]) {
+						find_frequencie_A = true;
+					}
+				}
+			}
+		}
+	}
+
+	public D1_TONES(int frequencie_A, int marginError, String strListFqs) {
+		MARGIN_ERROR = marginError;
+
+		String[] lines = strListFqs.split(System.getProperty("line.separator"));
+		for(int i = 0; i < lines.length; i++) {
+			if(!lines[i].contains("=")) {
+				int fq = Integer.valueOf(lines[i]);
+
+				Range fq_range = new Range(frequencie_A, MARGIN_ERROR, 0);
+				int[] tmp_range = fq_range.get();
+				for(int j = 0; j < tmp_range.length; j++) {
+					if(fq == tmp_range[j]) {
+						find_frequencie_A = true;
+						find_sfft++;
+					}
+				}
+			}
+		}
+	}
+
+	public boolean check() {
+		if(find_sfft > 0)
+			find_frequencie_A = true;
+
+		return find_frequencie_A;
+	}
+
+	public int getScoreSfft() {
+		return find_sfft;
+	}
 
 }

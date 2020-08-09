@@ -84,6 +84,5 @@ public class T_SFFT {
 	
 	public String get() {
 		return out;
-	}
-
+	}	
 }

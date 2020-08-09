@@ -79,4 +79,8 @@ public class T_FFT {
 
 		return out;
 	}
+	
+	public Pair[] getRaw() {
+		return frequenciesArray_fft;
+	}
 }

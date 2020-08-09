@@ -35,9 +35,9 @@ public class D2_SANDWICH {
 		int margin_frequencies = (frequencie_A - frequencie_B) / 2;
 		int frequencie_MID_A = frequencie_A - margin_frequencies;
 		int frequencie_MID_B = frequencie_B + margin_frequencies;
-		
+
 		MARGIN_ERROR = marginError;
-		
+
 		for(int i = 0; i < listFqs.length; i++) {
 			int fq = listFqs[i].index * sampleRate / n_fft;
 
@@ -60,7 +60,7 @@ public class D2_SANDWICH {
 					}
 				}
 			}
-						
+
 			if(find_frequencie_A && find_frequencie_B) {
 				fq_range = new Range(frequencie_MID_A, margin_frequencies + MARGIN_ERROR, 1);
 				tmp_range = fq_range.get();
@@ -80,7 +80,56 @@ public class D2_SANDWICH {
 			}
 		}
 	}
-	
+
+	public D2_SANDWICH(int frequencie_A, int frequencie_B, int marginError, String strListFqs) {
+		int margin_frequencies = (frequencie_A - frequencie_B) / 2;
+		int frequencie_MID_A = frequencie_A - margin_frequencies;
+		int frequencie_MID_B = frequencie_B + margin_frequencies;
+
+		MARGIN_ERROR = marginError;
+
+		String[] lines = strListFqs.split(System.getProperty("line.separator"));
+		for(int i = 0; i < lines.length; i++) {
+			if(!lines[i].contains("=")) {
+				int fq = Integer.valueOf(lines[i]);
+
+				Range fq_range = new Range(frequencie_A, MARGIN_ERROR, 0);
+				int[] tmp_range = fq_range.get();
+				for(int j = 0; j < tmp_range.length; j++) {
+					if(fq == tmp_range[j]) {
+						find_frequencie_A = true;
+					}
+				}
+
+				fq_range = new Range(frequencie_B, MARGIN_ERROR, 0);
+				tmp_range = fq_range.get();
+				for(int j = 0; j < tmp_range.length; j++) {
+					if(fq == tmp_range[j]) {
+						find_frequencie_B = true;
+					}
+				}
+
+				if(find_frequencie_A && find_frequencie_B) {
+					fq_range = new Range(frequencie_MID_A, margin_frequencies + MARGIN_ERROR, 1);
+					tmp_range = fq_range.get();
+					for(int j = 0; j < tmp_range.length; j++) {
+						if(fq == tmp_range[j]) {
+							score++;
+						}
+					}
+
+					fq_range = new Range(frequencie_MID_B, margin_frequencies + MARGIN_ERROR, 2);
+					tmp_range = fq_range.get();
+					for(int j = 0; j < tmp_range.length; j++) {
+						if(fq == tmp_range[j]) {
+							score++;
+						}
+					}
+				}
+			}
+		}
+	}
+
 	public int getScore() {
 		return score;
 	}
