@@ -283,7 +283,7 @@ public class Main {
 							int nbSplitFiles = 0;
 							boolean showTextArea = true;
 							for (File fileEntry : directoryFile.listFiles()) {
-								if (!fileEntry.isDirectory()) {
+								if (!fileEntry.isDirectory() && fileEntry.getName().contains("shelp_tmp_split_out_")) {
 									String tmpPathWav = fileEntry.getAbsolutePath();
 									System.out.println(tmpPathWav);
 
@@ -325,7 +325,6 @@ public class Main {
 									}
 								}
 							}
-							
 						} else {
 							Reader checkFile2 = new Reader(pathFile, false);
 
