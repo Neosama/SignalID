@@ -35,6 +35,8 @@ import java.nio.file.Paths;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import java.awt.BorderLayout;
+
+import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFileChooser;
 import javax.swing.JScrollPane;
@@ -42,6 +44,8 @@ import javax.swing.JTextArea;
 
 import tool.T_FFT;
 import tool.T_SFFT;
+import wavReader.Reader;
+import wavsplitter.WaveSplitter;
 
 public class Main {
 
@@ -51,6 +55,7 @@ public class Main {
 	private T_SFFT t_sfft;
 
 	private String pathFile = "";
+	private String str_textArea = "";
 	private boolean modeFFT = true;
 	private boolean modeSFFT = false;
 	private int top = 8;
@@ -245,6 +250,7 @@ public class Main {
 		});
 
 		JTextArea textArea = new JTextArea();
+		textArea.setEditable(false);
 		textArea.setLineWrap(true);
 		JScrollPane scroll = new JScrollPane (textArea, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		frmSelp.getContentPane().add(scroll, BorderLayout.CENTER);
@@ -258,16 +264,89 @@ public class Main {
 				if(returnVal == JFileChooser.APPROVE_OPTION) {
 					pathFile = chooser.getSelectedFile().getPath();
 
+					// Check File SR, BPS, nbChannels
 					try {
-						if(modeFFT) {
-							t_fft = new T_FFT(pathFile, top);
-							textArea.setText(t_fft.get());
-						} else {
-							t_sfft = new T_SFFT(pathFile, top);
-							textArea.setText(t_sfft.get());
+						Reader checkFile = new Reader(pathFile, false);
+
+						File soundFile = new File(pathFile);
+						String pathWithoutFilename = soundFile.getPath().replace(soundFile.getName(), "");
+
+						boolean splittedFiles = false;
+						if(checkFile.checkSplitFiles()) {
+							new WaveSplitter(pathFile, pathWithoutFilename, 5000); // CHANGE OUT PATH
+							splittedFiles = true;
 						}
 
+						if(splittedFiles) {
+							File directoryFile = new File(pathWithoutFilename);
+
+							int nbSplitFiles = 0;
+							boolean showTextArea = true;
+							for (File fileEntry : directoryFile.listFiles()) {
+								if (!fileEntry.isDirectory()) {
+									String tmpPathWav = fileEntry.getAbsolutePath();
+									System.out.println(tmpPathWav);
+
+									Reader checkFile2 = new Reader(tmpPathWav, false);
+
+									if(nbSplitFiles < 8) {
+										showTextArea = false;
+										textArea.setText(str_textArea + "\nSave the file to view all content (\"File\" -> \"Save File\")");
+									}
+
+									if(checkFile2.checkFile()) {
+										str_textArea += "====(" + nbSplitFiles + ")====\n";
+
+										if(modeFFT) {
+											t_fft = new T_FFT(tmpPathWav, top);
+											str_textArea += t_fft.get() + "\n";
+											if(showTextArea)
+												textArea.setText(str_textArea);
+										} else {
+											t_sfft = new T_SFFT(tmpPathWav, top);
+											str_textArea += t_sfft.get() + "\n";
+											if(showTextArea)
+												textArea.setText(t_sfft.get());
+										}
+
+										nbSplitFiles++;
+									}
+								}
+							}
+							
+							// Remove tmp files
+							for (File fileEntry : directoryFile.listFiles()) {
+								if (!fileEntry.isDirectory()) {
+									String tmpPathWav = fileEntry.getAbsolutePath();
+									System.out.println(tmpPathWav);
+									
+									if(!fileEntry.getName().contentEquals(soundFile.getName())) {
+										Files.delete(Paths.get(tmpPathWav));
+									}
+								}
+							}
+							
+						} else {
+							Reader checkFile2 = new Reader(pathFile, false);
+
+							if(checkFile2.checkFile()) {
+								if(modeFFT) {
+									t_fft = new T_FFT(pathFile, top);
+									str_textArea += t_fft.get() + "\n";
+									textArea.setText(str_textArea);
+								} else {
+									t_sfft = new T_SFFT(pathFile, top);
+									str_textArea += t_sfft.get() + "\n";
+									textArea.setText(t_sfft.get());
+								}
+							} else
+								textArea.setText("File (" + pathFile + ") not compatible!\nCheck if SAMPLERATE = 44100,\nBPS = 16,\nNumberChannels = 1,\nDuration >= 5 seconds");
+
+						}
 					} catch (IOException e1) {
+						e1.printStackTrace();
+					} catch (UnsupportedAudioFileException e1) {
+						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					}
 				}
@@ -277,8 +356,6 @@ public class Main {
 		mntmSaveFile.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {				
-				String content = textArea.getText();
-
 				JFrame parentFrame = new JFrame();
 
 				JFileChooser fileChooser = new JFileChooser();
@@ -290,7 +367,7 @@ public class Main {
 					File fileToSave = fileChooser.getSelectedFile();
 
 					try {
-						Files.write( Paths.get(fileToSave.getAbsolutePath()), content.getBytes());
+						Files.write(Paths.get(fileToSave.getAbsolutePath()), str_textArea.getBytes());
 					} catch (IOException e1) {
 						e1.printStackTrace();
 					}
@@ -320,7 +397,7 @@ public class Main {
 				}
 			}
 		});
-		
+
 		mntmD2_TONES.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -342,7 +419,7 @@ public class Main {
 				}
 			}
 		});
-		
+
 		mntmD2_SANDWICH.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
