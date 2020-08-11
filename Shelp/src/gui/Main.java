@@ -36,6 +36,10 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import java.awt.BorderLayout;
 
+import javax.sound.sampled.AudioFileFormat;
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFileChooser;
@@ -45,6 +49,8 @@ import javax.swing.JTextArea;
 import tool.T_FFT;
 import tool.T_SFFT;
 import wavReader.Reader;
+import wavsplitter.WavFile;
+import wavsplitter.WavFileException;
 import wavsplitter.WaveSplitter;
 
 public class Main {
@@ -267,84 +273,155 @@ public class Main {
 					// Check File SR, BPS, nbChannels
 					try {
 						Reader checkFile = new Reader(pathFile, false);
-
 						File soundFile = new File(pathFile);
-						String pathWithoutFilename = soundFile.getPath().replace(soundFile.getName(), "");
 
-						boolean splittedFiles = false;
-						if(checkFile.checkSplitFiles()) {
-							new WaveSplitter(pathFile, pathWithoutFilename, 5000); // CHANGE OUT PATH
-							splittedFiles = true;
+						String pathResampledTmp = pathFile + "_resampled_TMP";
+						String pathSplitTmp = pathFile + "_splitted_TMP";
+
+						boolean resampled = false;
+
+						if(checkFile.checkSR()) {
+							AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(soundFile);
+							AudioFormat sourceFormat =  audioInputStream.getFormat();
+
+							AudioFormat targetFormat = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED,
+									44100f,
+									sourceFormat.getSampleSizeInBits(),
+									sourceFormat.getChannels(),
+									sourceFormat.getFrameSize(),
+									sourceFormat.getFrameRate(),
+									sourceFormat.isBigEndian());
+
+							AudioInputStream inputStream = AudioSystem.getAudioInputStream(targetFormat, audioInputStream);
+							AudioSystem.write(inputStream, AudioFileFormat.Type.WAVE, new File(pathResampledTmp));
+							inputStream.close();
+
+							checkFile = new Reader(pathResampledTmp, false);
+							soundFile = new File(pathResampledTmp);
+
+							resampled = true;
 						}
 
-						if(splittedFiles) {
-							File directoryFile = new File(pathWithoutFilename);
+						if(checkFile.checkSplitFiles()) {
+							str_textArea = "";
 
-							int nbSplitFiles = 0;
 							boolean showTextArea = true;
-							for (File fileEntry : directoryFile.listFiles()) {
-								if (!fileEntry.isDirectory() && fileEntry.getName().contains("shelp_tmp_split_out_")) {
-									String tmpPathWav = fileEntry.getAbsolutePath();
-									System.out.println(tmpPathWav);
 
-									Reader checkFile2 = new Reader(tmpPathWav, false);
+							// Get the wave file from the embedded resources
+							WavFile inputWavFile = WavFile.openWavFile(soundFile);
 
-									if(nbSplitFiles < 8) {
-										showTextArea = false;
-										textArea.setText(str_textArea + "\nSave the file to view all content (\"File\" -> \"Save File\")");
-									}
+							// Get the number of audio channels in the wav file
+							int numChannels = inputWavFile.getNumChannels();
+							// set the maximum number of frames for a target file,
+							// based on the number of milliseconds assigned for each file
+							int maxFramesPerFile = (int) inputWavFile.getSampleRate() * 5000 / 1000;
 
-									if(checkFile2.checkFile()) {
-										str_textArea += "====(" + nbSplitFiles + ")====\n";
+							// Create a buffer of maxFramesPerFile frames
+							double[] buffer = new double[maxFramesPerFile * numChannels];
 
-										if(modeFFT) {
-											t_fft = new T_FFT(tmpPathWav, top);
-											str_textArea += t_fft.get() + "\n";
-											if(showTextArea)
-												textArea.setText(str_textArea);
-										} else {
-											t_sfft = new T_SFFT(tmpPathWav, top);
-											str_textArea += t_sfft.get() + "\n";
-											if(showTextArea)
-												textArea.setText(t_sfft.get());
-										}
+							int framesRead;
+							int fileCount = 0;
+							do {
+								// Read frames into buffer
+								framesRead = inputWavFile.readFrames(buffer, maxFramesPerFile);
 
-										nbSplitFiles++;
+								WavFile outputWavFile = WavFile.newWavFile(
+										new File(pathSplitTmp),
+										inputWavFile.getNumChannels(),
+										framesRead,
+										inputWavFile.getValidBits(),
+										inputWavFile.getSampleRate());
+
+								// Write the buffer
+								outputWavFile.writeFrames(buffer, framesRead);
+								outputWavFile.close();
+
+								// ========
+
+								Reader checkFile2 = new Reader(pathSplitTmp, false);
+
+								if(fileCount < 8) {
+									showTextArea = false;
+									textArea.setText(str_textArea + "\nSave the file to view all content (\"File\" -> \"Save File\")");
+								}
+
+								if(checkFile2.checkFile()) {
+									str_textArea += "====(" + fileCount + ")====\n";
+
+									if(modeFFT) {
+										t_fft = new T_FFT(pathSplitTmp, top);
+										str_textArea += t_fft.get() + "\n";
+										if(showTextArea)
+											textArea.setText(str_textArea);
+									} else {
+										t_sfft = new T_SFFT(pathSplitTmp, top);
+										str_textArea += t_sfft.get() + "\n";
+										if(showTextArea)
+											textArea.setText(t_sfft.get());
 									}
 								}
-							}
-							
-							// Remove tmp files
-							for (File fileEntry : directoryFile.listFiles()) {
-								if (!fileEntry.isDirectory()) {
-									String tmpPathWav = fileEntry.getAbsolutePath();
-									System.out.println(tmpPathWav);
-									
-									if(!fileEntry.getName().contentEquals(soundFile.getName())) {
-										Files.delete(Paths.get(tmpPathWav));
-									}
-								}
-							}
+
+								// ========
+
+								// Delete tmp split file
+								Files.delete(Paths.get(pathSplitTmp));
+
+								fileCount++;
+							} while (framesRead != 0);
+
+							// Close the input file
+							inputWavFile.close();
+
+							// Delete tmp resampled file
+							File file = new File(pathResampledTmp);
+							if(file.exists())
+								Files.delete(Paths.get(pathResampledTmp));
 						} else {
-							Reader checkFile2 = new Reader(pathFile, false);
+							str_textArea = "";
 
-							if(checkFile2.checkFile()) {
-								if(modeFFT) {
-									t_fft = new T_FFT(pathFile, top);
-									str_textArea += t_fft.get() + "\n";
-									textArea.setText(str_textArea);
-								} else {
-									t_sfft = new T_SFFT(pathFile, top);
-									str_textArea += t_sfft.get() + "\n";
-									textArea.setText(t_sfft.get());
-								}
-							} else
-								textArea.setText("File (" + pathFile + ") not compatible!\nCheck if SAMPLERATE = 44100,\nBPS = 16,\nNumberChannels = 1,\nDuration >= 5 seconds");
+							if(resampled) {
+								Reader checkFile2 = new Reader(pathResampledTmp, false);
 
+								if(checkFile2.checkFile()) {
+									if(modeFFT) {
+										t_fft = new T_FFT(pathResampledTmp, top);
+										str_textArea += t_fft.get() + "\n";
+										textArea.setText(str_textArea);
+									} else {
+										t_sfft = new T_SFFT(pathResampledTmp, top);
+										str_textArea += t_sfft.get() + "\n";
+										textArea.setText(t_sfft.get());
+									}
+								} else
+									textArea.setText("File (" + pathResampledTmp + ") not compatible!\nCheck if SAMPLERATE = 44100,\nBPS = 16,\nNumberChannels = 1,\nDuration >= 5 seconds");
+
+								// Delete tmp resampled file
+								File file = new File(pathResampledTmp);
+								if(file.exists())
+									Files.delete(Paths.get(pathResampledTmp));
+							} else {
+								Reader checkFile2 = new Reader(pathFile, false);
+
+								if(checkFile2.checkFile()) {
+									if(modeFFT) {
+										t_fft = new T_FFT(pathFile, top);
+										str_textArea += t_fft.get() + "\n";
+										textArea.setText(str_textArea);
+									} else {
+										t_sfft = new T_SFFT(pathFile, top);
+										str_textArea += t_sfft.get() + "\n";
+										textArea.setText(t_sfft.get());
+									}
+								} else
+									textArea.setText("File (" + pathFile + ") not compatible!\nCheck if SAMPLERATE = 44100,\nBPS = 16,\nNumberChannels = 1,\nDuration >= 5 seconds");
+							}
 						}
 					} catch (IOException e1) {
 						e1.printStackTrace();
 					} catch (UnsupportedAudioFileException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					} catch (WavFileException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					}
@@ -392,7 +469,15 @@ public class Main {
 					String[] parameters = {pathFile,mode,String.valueOf(top), "D1_TONES"};
 
 					Detector detector = new Detector();
-					detector.main(parameters);
+					try {
+						detector.main(parameters);
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					} catch (UnsupportedAudioFileException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
 				}
 			}
 		});
@@ -414,7 +499,15 @@ public class Main {
 					String[] parameters = {pathFile,mode,String.valueOf(top), "D2_TONES"};
 
 					Detector detector = new Detector();
-					detector.main(parameters);
+					try {
+						detector.main(parameters);
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					} catch (UnsupportedAudioFileException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
 				}
 			}
 		});
@@ -436,7 +529,15 @@ public class Main {
 					String[] parameters = {pathFile,mode,String.valueOf(top), "D2_SANDWICH"};
 
 					Detector detector = new Detector();
-					detector.main(parameters);
+					try {
+						detector.main(parameters);
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					} catch (UnsupportedAudioFileException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
 				}
 			}
 		});

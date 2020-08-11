@@ -20,6 +20,7 @@ package gui;
 import java.awt.EventQueue;
 
 import javax.swing.JFrame;
+import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JTextField;
@@ -30,10 +31,12 @@ import detector.D2_SANDWICH;
 import detector.D2_TONES;
 import tool.T_FFT;
 import tool.T_SFFT;
+import wavReader.Reader;
 
 import javax.swing.JButton;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 
 import javax.swing.JTextArea;
 
@@ -52,8 +55,10 @@ public class Detector {
 
 	/**
 	 * Launch the application.
+	 * @throws IOException 
+	 * @throws UnsupportedAudioFileException 
 	 */
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException, UnsupportedAudioFileException {
 
 		if(args.length < 1)
 			return;
@@ -156,6 +161,7 @@ public class Detector {
 		btnCheck.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
+
 				// Check values textFields
 				String rawTfFq1 = textFieldFq1.getText();
 				String rawTfFq2 = textFieldFq2.getText();
@@ -166,63 +172,68 @@ public class Detector {
 				int margin = 0;
 				int top = 0;
 				try {
-					fq1 = Integer.valueOf(rawTfFq1);
-					fq2 = Integer.valueOf(rawTfFq2);
-					margin = Integer.valueOf(rawTfMargin);
-					textAreaResult.setText("fq1 = " + fq1 + " fq2 = " + fq2 + " margin = " + margin);
+					Reader checkFile = new Reader(pathFile, false);
 
-					top = Integer.valueOf(rawTop);
-					
-					// FFT or SFFT
-					if(strMode.contentEquals("FFT")) {
-						T_FFT t_fft = new T_FFT(pathFile, top);
-
-						if(typeDetector.contentEquals("D1_TONES")) {
-							D1_TONES d1_tones = new D1_TONES(fq1, margin, top, 44100, 65536, t_fft.getRaw());
-							String tmp = "D1_TONES = " + d1_tones.check() + "\n\n";
-							tmp += "With Parameters : \nFrequencie 1 = " + fq1 + "\nTop = " + top;
-							textAreaResult.setText(tmp);
-						}
-
-						if(typeDetector.contentEquals("D2_TONES")) {
-							D2_TONES d2_tones = new D2_TONES(fq1, fq2, margin, top, 44100, 65536, t_fft.getRaw());
-							String tmp = "D2_TONES = " + d2_tones.check() + "\n\n";
-							tmp += "With Parameters : \nFrequencie 1 = " + fq1 + "\nFrequencie 2 = " + fq2 + "\nTop = " + top;
-							textAreaResult.setText(tmp);
-						}
-
-						if(typeDetector.contentEquals("D2_SANDWICH")) {
-							D2_SANDWICH d2_sandwich = new D2_SANDWICH(fq1, fq2, margin, top, 44100, 65536, t_fft.getRaw());
-							String tmp = "D2_SANDWICH = " + d2_sandwich.getScore() + "\n\n";
-							tmp += "With Parameters : \nFrequencie 1 = " + fq1 + "\nFrequencie 2 = " + fq2 + "\nTop = " + top;
-							textAreaResult.setText(tmp);
-						}
-
+					if(!checkFile.checkFile()) {
+						textAreaResult.setText("File not compatible!\n\nCheck if SAMPLERATE = 44100,\nBPS = 16,\nNumberChannels = 1,\nDuration >= 5 seconds");
 					} else {
-						T_SFFT t_sfft = new T_SFFT(pathFile, top);
+						fq1 = Integer.valueOf(rawTfFq1);
+						fq2 = Integer.valueOf(rawTfFq2);
+						margin = Integer.valueOf(rawTfMargin);
+						textAreaResult.setText("fq1 = " + fq1 + " fq2 = " + fq2 + " margin = " + margin);
 
-						if(typeDetector.contentEquals("D1_TONES")) {
-							D1_TONES d1_tones = new D1_TONES(fq1, margin, t_sfft.get());
-							String tmp = "D1_TONES = " + d1_tones.check() + " (scoreSFFT = " + d1_tones.getScoreSfft() + ")\n\n";
-							tmp += "With Parameters : \nFrequencie 1 = " + fq1 + "\nTop = " + top;
-							textAreaResult.setText(tmp);
-						}
+						top = Integer.valueOf(rawTop);
 
-						if(typeDetector.contentEquals("D2_TONES")) {
-							D2_TONES d2_tones = new D2_TONES(fq1, fq2, margin, t_sfft.get());
-							String tmp = "D2_TONES = " + d2_tones.check() + " (scoreSFFT = " + d2_tones.getScoreSfft() + ")\n\n";
-							tmp += "With Parameters : \nFrequencie 1 = " + fq1 + "\nFrequencie 2 = " + fq2 + "\nTop = " + top;
-							textAreaResult.setText(tmp);
-						}
+						// FFT or SFFT
+						if(strMode.contentEquals("FFT")) {
+							T_FFT t_fft = new T_FFT(pathFile, top);
 
-						if(typeDetector.contentEquals("D2_SANDWICH")) {
-							D2_SANDWICH d2_sandwich = new D2_SANDWICH(fq1, fq2, margin, t_sfft.get());
-							String tmp = "D2_SANDWICH = " + d2_sandwich.getScore() + "\n\n";
-							tmp += "With Parameters : \nFrequencie 1 = " + fq1 + "\nFrequencie 2 = " + fq2 + "\nTop = " + top;
-							textAreaResult.setText(tmp);
+							if(typeDetector.contentEquals("D1_TONES")) {
+								D1_TONES d1_tones = new D1_TONES(fq1, margin, top, 44100, 65536, t_fft.getRaw());
+								String tmp = "D1_TONES = " + d1_tones.check() + "\n\n";
+								tmp += "With Parameters : \nFrequencie 1 = " + fq1 + "\nTop = " + top;
+								textAreaResult.setText(tmp);
+							}
+
+							if(typeDetector.contentEquals("D2_TONES")) {
+								D2_TONES d2_tones = new D2_TONES(fq1, fq2, margin, top, 44100, 65536, t_fft.getRaw());
+								String tmp = "D2_TONES = " + d2_tones.check() + "\n\n";
+								tmp += "With Parameters : \nFrequencie 1 = " + fq1 + "\nFrequencie 2 = " + fq2 + "\nTop = " + top;
+								textAreaResult.setText(tmp);
+							}
+
+							if(typeDetector.contentEquals("D2_SANDWICH")) {
+								D2_SANDWICH d2_sandwich = new D2_SANDWICH(fq1, fq2, margin, top, 44100, 65536, t_fft.getRaw());
+								String tmp = "D2_SANDWICH = " + d2_sandwich.getScore() + "\n\n";
+								tmp += "With Parameters : \nFrequencie 1 = " + fq1 + "\nFrequencie 2 = " + fq2 + "\nTop = " + top;
+								textAreaResult.setText(tmp);
+							}
+
+						} else {
+							T_SFFT t_sfft = new T_SFFT(pathFile, top);
+
+							if(typeDetector.contentEquals("D1_TONES")) {
+								D1_TONES d1_tones = new D1_TONES(fq1, margin, t_sfft.get());
+								String tmp = "D1_TONES = " + d1_tones.check() + " (scoreSFFT = " + d1_tones.getScoreSfft() + ")\n\n";
+								tmp += "With Parameters : \nFrequencie 1 = " + fq1 + "\nTop = " + top;
+								textAreaResult.setText(tmp);
+							}
+
+							if(typeDetector.contentEquals("D2_TONES")) {
+								D2_TONES d2_tones = new D2_TONES(fq1, fq2, margin, t_sfft.get());
+								String tmp = "D2_TONES = " + d2_tones.check() + " (scoreSFFT = " + d2_tones.getScoreSfft() + ")\n\n";
+								tmp += "With Parameters : \nFrequencie 1 = " + fq1 + "\nFrequencie 2 = " + fq2 + "\nTop = " + top;
+								textAreaResult.setText(tmp);
+							}
+
+							if(typeDetector.contentEquals("D2_SANDWICH")) {
+								D2_SANDWICH d2_sandwich = new D2_SANDWICH(fq1, fq2, margin, t_sfft.get());
+								String tmp = "D2_SANDWICH = " + d2_sandwich.getScore() + "\n\n";
+								tmp += "With Parameters : \nFrequencie 1 = " + fq1 + "\nFrequencie 2 = " + fq2 + "\nTop = " + top;
+								textAreaResult.setText(tmp);
+							}
 						}
 					}
-
 				} catch(Exception e2) {
 					e2.printStackTrace();
 					textAreaResult.setText("Set Only Numbers !");

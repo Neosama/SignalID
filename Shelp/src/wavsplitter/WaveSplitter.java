@@ -12,7 +12,7 @@ import java.nio.file.Paths;
  */
 public class WaveSplitter {
 
-	public WaveSplitter(String pathWav, String pathOut, int durationMs) {
+	public WaveSplitter(String pathWav, String pathWavTmp, int durationMs) {
 		try {
 			// Get the wave file from the embedded resources
 			File soundFile = new File(pathWav);
@@ -34,7 +34,7 @@ public class WaveSplitter {
 				framesRead = inputWavFile.readFrames(buffer, maxFramesPerFile);
 				
 				WavFile outputWavFile = WavFile.newWavFile(
-						new File(pathOut + "\\shelp_tmp_split_out_" + (fileCount + 1) + ".wav"),
+						new File(pathWavTmp),
 						inputWavFile.getNumChannels(),
 						framesRead,
 						inputWavFile.getValidBits(),
@@ -44,6 +44,11 @@ public class WaveSplitter {
 				outputWavFile.writeFrames(buffer, framesRead);
 				outputWavFile.close();
 				fileCount++;
+				
+				// ========
+				
+				// ========
+				
 			} while (framesRead != 0);
 
 			// Close the input file

@@ -83,29 +83,45 @@ public class Reader {
 	public boolean checkFile() throws UnsupportedAudioFileException, IOException {
 		File checkSize = new File(filepath);
 		AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(checkSize);
-	    AudioFormat format = audioInputStream.getFormat();
-	    long audioFileLength = checkSize.length();
-	    int frameSize = format.getFrameSize();
-	    float frameRate = format.getFrameRate();
-	    int durationInSeconds = (int)(audioFileLength / (frameSize * frameRate));
-		
-	    
+		AudioFormat format = audioInputStream.getFormat();
+		long audioFileLength = checkSize.length();
+		int frameSize = format.getFrameSize();
+		float frameRate = format.getFrameRate();
+		int durationInSeconds = (int)(audioFileLength / (frameSize * frameRate));
+
+		audioInputStream.close();
 		if(noOfChannels == 1 && SR == 44100 && BPS == 16 && durationInSeconds == 5)
 			return true;
 
-	    System.out.println("FALSE durationInSeconds = " + durationInSeconds);
 		return false;
 	}
-	
+
+	public boolean checkSR() throws UnsupportedAudioFileException, IOException {
+		File checkSize = new File(filepath);
+		AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(checkSize);
+		AudioFormat format = audioInputStream.getFormat();
+		long audioFileLength = checkSize.length();
+		int frameSize = format.getFrameSize();
+		float frameRate = format.getFrameRate();
+		int durationInSeconds = (int)(audioFileLength / (frameSize * frameRate));
+
+		audioInputStream.close();
+		if(noOfChannels == 1 && SR != 44100 && BPS == 16)
+			return true;
+		
+		return false;
+	}
+
 	public boolean checkSplitFiles() throws UnsupportedAudioFileException, IOException {
 		File checkSize = new File(filepath);
 		AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(checkSize);
-	    AudioFormat format = audioInputStream.getFormat();
-	    long audioFileLength = checkSize.length();
-	    int frameSize = format.getFrameSize();
-	    float frameRate = format.getFrameRate();
-	    float durationInSeconds = (audioFileLength / (frameSize * frameRate));
-	    
+		AudioFormat format = audioInputStream.getFormat();
+		long audioFileLength = checkSize.length();
+		int frameSize = format.getFrameSize();
+		float frameRate = format.getFrameRate();
+		float durationInSeconds = (audioFileLength / (frameSize * frameRate));
+
+		audioInputStream.close();
 		if(noOfChannels == 1 && SR == 44100 && BPS == 16 && durationInSeconds >= 10)
 			return true;
 
