@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-SignalID - SIGNAL DESCRIPTION (n4)
+SignalID - SIGNAL DESCRIPTION
 
 NAME : STANAG 4285 - Thales Système 3000 (TS3000)
 REVISION : 1

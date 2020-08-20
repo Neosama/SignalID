@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-SignalID - SIGNAL DESCRIPTION (n3)
+SignalID - SIGNAL DESCRIPTION
 
 NAME : STANAG 4285 - IDLE
 REVISION : 1
