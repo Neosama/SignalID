@@ -1,0 +1,63 @@
+/*
+ *  Copyright (C) 2020 Tortillum / Neosama
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+SignalID - SIGNAL DESCRIPTION (n4)
+
+NAME : STANAG 4285 - Thales Système 3000 (TS3000)
+REVISION : 1
+
+SOURCES :
+- SigidWiki
+
+FREQUENCIES :
+
+=== FFT ===
+-- RESULT --
+FqA = 1456 (4/5)
+FqB = 1390 (4/5)
+VALIDATE : (A=3/5)
+
+FqA = 1343
+FqB = 1173
+VALIDATE : (B=2/5)
+
+SCORE MINIMUM 1 for VALIDATION
+
+==== SFFT ====
+-- RESULT --
+1464
+1335
+1378
+1421
+1248
+1291
+1076
+775
+861
+990
+1162
+1076
+1550
+1033
+1119
+1205
+1679
+1722
+1593
+1808
+
+SCORE MINIMUM 2 for VALIDATION
