@@ -1,0 +1,59 @@
+/*
+ *  Copyright (C) 2020 Tortillum / Neosama
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+SignalID - SIGNAL DESCRIPTION (n3)
+
+NAME : STANAG 4285 - IDLE
+REVISION : 1
+
+SOURCES :
+- SigidWiki
+
+FREQUENCIES :
+
+=== FFT ===
+-- RESULT --
+FqA = 2491
+FqB = 644
+
+SCORE MINIMUM 1 for VALIDATION
+
+==== SFFT ====
+-- RESULT --
+1119
+2325
+1808
+818
+2067
+2368
+1679
+1076
+1464
+1722
+1421
+1378
+2196
+645
+1335
+1205
+2153
+2110
+1894
+1937
+2497
+
+SCORE MINIMUM 2 for VALIDATION
