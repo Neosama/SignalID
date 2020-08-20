@@ -1,0 +1,72 @@
+/*
+ *  Copyright (C) 2020 Tortillum / Neosama
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+SignalID - SIGNAL DESCRIPTION (n5)
+
+NAME : STANAG 4285 - 8PSK
+REVISION : 1
+
+SOURCES :
+- SigidWiki
+
+FREQUENCIES :
+
+=== FFT ===
+-- RESULT --
+V : A
+FqA = 2397 (6/7)
+FqB = 1160 (4/7)
+VALIDATION = (A=3/7)
+
+V : B
+FqA = 2397 (6/7)
+FqB = 2078 (4/7)
+VALIDATION = (B=3/7)
+
+V : C
+FqA = 2078 (4/7)
+FqB = 1544 (2/7)
+VALIDATION = (B=1/7)
+
+SCORE MINIMUM 1 for VALIDATION
+
+==== SFFT ====
+-- RESULT --
+1162
+1335
+1464
+1378
+1248
+2153
+2110
+1550
+1851
+1421
+2411
+2454
+2627
+2239
+2799
+2325
+1937
+2497
+2540
+2067
+861
+1291
+
+SCORE MINIMUM 2 for VALIDATION
