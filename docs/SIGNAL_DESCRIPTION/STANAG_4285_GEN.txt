@@ -1,0 +1,56 @@
+/*
+ *  Copyright (C) 2020 Tortillum / Neosama
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+SignalID - SIGNAL DESCRIPTION (n1)
+
+NAME : STANAG 4285 - GEN
+REVISION : 2
+
+SOURCES :
+- stanag_5227.7kHz_001 (WEBSDR)
+- stanag_6406.0kHz_001 (WEBSDR)
+- stanag_5215.6kHz_001 (WEBSDR)
+- stanag_6348.0kHz_001 (WEBSDR)
+
+FREQUENCIES :
+
+=== FFT ===
+-- RESULT --
+FqA = 2413
+FqB = 1401
+
+FqA = 2188
+FqB = 1401
+
+FqA = 2642
+FqB = 636
+
+SCORE MINIMUM 1 for VALIDATION
+
+==== SFFT ====
+-- RESULT --
+1550 @118 #2
+2713 @139 #2
+1335 @186 #2
+1507 @114 #2
+2282 @57 #2
+2454 @92 #2
+2583 @121 #2
+1421 @586 #2
+1119 @584 #2
+
+SCORE MINIMUM 2 for VALIDATION
