@@ -1,0 +1,61 @@
+/*
+ *  Copyright (C) 2020 Tortillum / Neosama
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+SignalID - SIGNAL DESCRIPTION (n4)
+
+NAME : STANAG 4285 - TFC
+REVISION : 1
+
+SOURCES :
+- SigidWiki
+
+FREQUENCIES :
+
+=== FFT ===
+-- RESULT --
+FqA = 2423
+FqB = 1655
+
+SCORE MINIMUM 1 for VALIDATION
+
+==== SFFT ====
+-- RESULT --
+1679
+1765
+1851
+1808
+1593
+2497
+1981
+1421
+1507
+2325
+1722
+2239
+1550
+2368
+2282
+2067
+2411
+1894
+2153
+1937
+2110
+2196
+2024
+
+SCORE MINIMUM 2 for VALIDATION
