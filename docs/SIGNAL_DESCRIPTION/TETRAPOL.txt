@@ -1,0 +1,95 @@
+/*
+ *  Copyright (C) 2020 Tortillum / Neosama
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+SignalID - SIGNAL DESCRIPTION
+
+NAME : TETRAPOL
+REVISION : 1
+
+SOURCES :
+- SigidWiki
+
+FREQUENCIES :
+
+=== FFT ===
+-- RESULT --
+V : A
+FqA = 1349 (2/3)
+FqB = 1199 (3/3)
+
+V : B
+FqA = 1199 (3/3)
+FqB = 0900 (2/2)
+
+V : C
+FqA = 1349
+FqB = 1000
+
+V : D
+FqA = 1150
+FqB = 1050
+
+SCORE MINIMUM 1 for VALIDATION
+
+==== SFFT ====
+-- RESULT --
+0215
+0258
+0301
+0344
+0387
+0430
+0473
+0516
+0559
+0602
+0645
+0689
+0732
+0775
+0818
+0861
+0904
+0947
+0990
+1033
+1076
+1119
+1162
+1205
+1248
+1291
+1335
+1378
+1421
+1464
+1507
+1550
+1593
+1636
+1679
+1722
+1765
+1808
+1851
+1894
+1937
+1981
+2067
+2110
+
+SCORE MINIMUM 2 for VALIDATION
