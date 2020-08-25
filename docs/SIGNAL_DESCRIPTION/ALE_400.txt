@@ -1,0 +1,79 @@
+/*
+ *  Copyright (C) 2020 Tortillum / Neosama
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+SignalID - SIGNAL DESCRIPTION
+
+NAME : ALE - 400
+REVISION : 1
+
+SOURCES :
+- SigidWiki
+
+FREQUENCIES :
+
+=== FFT ===
+-- RESULT --
+
+FqA = 1804 (5/5)
+FqB = 1452 (4/5)
+
+FqA = 1804
+FqB = 1653
+
+SCORE MINIMUM 1 for VALIDATION
+
+==== SFFT ====
+-- RESULT --
+129
+172
+215
+258
+301
+387
+430
+473
+516
+559
+602
+689
+818
+947
+990
+1033
+1205
+1248
+1291
+1335
+1378
+1421
+1464
+1507
+1550
+1593
+1636
+1679
+1722
+1765
+1808
+1851
+1894
+1937
+1981
+2024
+2971
+
+SCORE MINIMUM 2 for VALIDATION
