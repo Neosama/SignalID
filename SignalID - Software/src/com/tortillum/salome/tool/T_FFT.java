@@ -19,9 +19,9 @@ package com.tortillum.salome.tool;
 
 import com.tortillum.salome.other.Pair;
 import com.tortillum.salome.recognizer.Score;
+import com.tortillum.salome.signal.INFO_SIGNAL;
 import com.tortillum.salome.signal.ALE_400;
 import com.tortillum.salome.signal.FT8;
-import com.tortillum.salome.signal.INFO_SIGNAL;
 import com.tortillum.salome.signal.RTTY;
 import com.tortillum.salome.signal.STANAG_4285_8PSK;
 import com.tortillum.salome.signal.STANAG_4285_GEN;
@@ -116,9 +116,9 @@ public class T_FFT {
         STANAG_4285_TS3000 stanag_4285_TS3000_check = new STANAG_4285_TS3000(44100, n_fft, frequenciesArray_fft);
         pScores[INFO_SIGNAL.ID_STANAG_4285_TS3000].addScore_FFT(stanag_4285_TS3000_check.getScore() * INFO_SIGNAL.WEIGHT_STANAG_4285_TS3000);
 
-        // FT8
-        FT8 ft8_check = new FT8(44100, n_fft, frequenciesArray_fft);
-        pScores[INFO_SIGNAL.ID_FT8].addScore_FFT(ft8_check.getScore() * INFO_SIGNAL.WEIGHT_FT8);
+        // FT8 - Only for SFFT
+        //FT8 ft8_check = new FT8(44100, n_fft, frequenciesArray_fft);
+        //pScores[INFO_SIGNAL.ID_FT8].addScore_FFT(ft8_check.getScore() * INFO_SIGNAL.WEIGHT_FT8);
 
         // TETRAPOL
         TETRAPOL tetrapol_check = new TETRAPOL(44100, n_fft, frequenciesArray_fft);

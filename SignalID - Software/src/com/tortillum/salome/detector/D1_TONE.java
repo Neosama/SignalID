@@ -21,56 +21,82 @@ import com.tortillum.salome.other.Pair;
 import com.tortillum.salome.other.Range;
 
 public class D1_TONE {
-    private int MARGIN_ERROR = 5; // in Hertz
+	private int MARGIN_ERROR = 5; // in Hertz
 
-    private int score_multiples = 0; // Only with int[] method
-    private boolean find_frequencie_A = false;
+	private int score_multiples = 0; // Only with int[] method
+	private boolean find_frequencie_A = false;
 
-    public D1_TONE(int frequencie_A, int marginError, int topA, int sampleRate, int n_fft, Pair[] listFqs) {
-        MARGIN_ERROR = marginError;
+	public D1_TONE(int frequencie_A, int marginError, int topA, int sampleRate, int n_fft, Pair[] listFqs) {
+		MARGIN_ERROR = marginError;
 
-        for(int i = 0; i < listFqs.length; i++) {
-            int fq = listFqs[i].index * sampleRate / n_fft;
+		for(int i = 0; i < listFqs.length; i++) {
+			int fq = listFqs[i].index * sampleRate / n_fft;
 
-            Range fq_range = new Range(frequencie_A, MARGIN_ERROR, 0);
-            int[] tmp_range = fq_range.get();
-            for(int j = 0; j < tmp_range.length; j++) {
-                if(i < topA) {
-                    if(fq == tmp_range[j]) {
-                        find_frequencie_A = true;
-                    }
-                }
-            }
-        }
-    }
+			Range fq_range = new Range(frequencie_A, MARGIN_ERROR, 0);
+			int[] tmp_range = fq_range.get();
+			for(int j = 0; j < tmp_range.length; j++) {
+				if(i < topA) {
+					if(fq == tmp_range[j]) {
+						find_frequencie_A = true;
+					}
+				}
+			}
+		}
+	}
 
-    public D1_TONE(int[] frequencies, int marginError, int topA, int sampleRate, int n_fft, Pair[] listFqs) {
-        MARGIN_ERROR = marginError;
+	//    public D1_TONE(int[] frequencies, int marginError, int topA, int sampleRate, int n_fft, Pair[] listFqs) {
+	//        MARGIN_ERROR = marginError;
+	//
+	//        for(int frequencie_A : frequencies) {
+	//            for (int i = 0; i < listFqs.length; i++) {
+	//                int fq = listFqs[i].index * sampleRate / n_fft;
+	//
+	//                Range fq_range = new Range(frequencie_A, MARGIN_ERROR, 0);
+	//                int[] tmp_range = fq_range.get();
+	//                for (int j = 0; j < tmp_range.length; j++) {
+	//                    if (i < topA) {
+	//                        if (fq == tmp_range[j]) {
+	//                            find_frequencie_A = true;
+	//                            score_multiples++;
+	//                        }
+	//                    }
+	//                }
+	//            }
+	//        }
+	//    }
 
-        for(int frequencie_A : frequencies) {
-            for (int i = 0; i < listFqs.length; i++) {
-                int fq = listFqs[i].index * sampleRate / n_fft;
+	public D1_TONE(int[] frequencies, int marginError, int topA, int sampleRate, int n_fft, Pair[] listFqs) {
+		MARGIN_ERROR = marginError;
 
-                Range fq_range = new Range(frequencie_A, MARGIN_ERROR, 0);
-                int[] tmp_range = fq_range.get();
-                for (int j = 0; j < tmp_range.length; j++) {
-                    if (i < topA) {
-                        if (fq == tmp_range[j]) {
-                            find_frequencie_A = true;
-                            score_multiples++;
-                        }
-                    }
-                }
-            }
-        }
-    }
+		int sizeList = 0;
 
-    public boolean check() {
-        return find_frequencie_A;
-    }
+		if(topA < listFqs.length)
+			sizeList = topA;
+		else
+			sizeList = listFqs.length;
 
-    // Only with int[] method
-    public int getScore(){
-        return score_multiples;
-    }
+		for(int frequencie_A : frequencies) {
+			for (int i = 0; i < sizeList; i++) {
+				int fq = listFqs[i].index * sampleRate / n_fft;
+
+				Range fq_range = new Range(frequencie_A, MARGIN_ERROR, 0);
+				int[] tmp_range = fq_range.get();
+				for (int j = 0; j < tmp_range.length; j++) {
+					if (fq == tmp_range[j]) {
+						find_frequencie_A = true;
+						score_multiples++;
+					}
+				}
+			}
+		}
+	}
+
+	public boolean check() {
+		return find_frequencie_A;
+	}
+
+	// Only with int[] method
+	public int getScore(){
+		return score_multiples;
+	}
 }

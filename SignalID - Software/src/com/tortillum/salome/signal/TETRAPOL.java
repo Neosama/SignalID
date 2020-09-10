@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// NAME : TETRAPOL
+// NAME : TETRAPOL (DISABLED : line 86)
 // REVISION : 1
 
 package com.tortillum.salome.signal;
@@ -83,6 +83,7 @@ public class TETRAPOL {
             tmpScore += d1_tone.getScore();
         }
 
-        return tmpScore;
+        return 0;
+        //return tmpScore; DISABLED
     }
 }

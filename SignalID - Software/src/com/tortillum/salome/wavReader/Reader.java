@@ -111,4 +111,8 @@ public class Reader {
 
         return false;
     }
+    
+    public int getDuration() {
+    	return durationInSeconds;
+    }
 }
