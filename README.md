@@ -1,7 +1,7 @@
 # SignalID - Automatic Radio Signal Identification
 
 #### Screenshot :
-![SignalID - Software](/docs/imgs/SignalID_software.PNG)  
+![SignalID - Software](/docs/imgs/SignalID_software_v2.PNG)  
 
 #### Contains :  
 - The source code of the Android application and the identification algorithm.  
