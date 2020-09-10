@@ -47,6 +47,20 @@
             app:srcCompat="@drawable/ic_icon"
             android:contentDescription="Button for start recognition" />
 
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="0.1" />
+
+        <ImageButton
+            android:id="@+id/main_imageButtonSearchFromFile"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:background="@null"
+            app:srcCompat="@drawable/ic_btn_filewav"
+            android:contentDescription="Button for search from file" />
+
         <TextView
             android:id="@+id/main_textViewResult"
             android:layout_width="match_parent"
@@ -69,5 +83,33 @@
             android:layout_gravity="center"
             android:textStyle="bold"
             android:text="0 - 30 MHz" />
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="0.1" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="right"
+        tools:layout_editor_absoluteX="1dp"
+        tools:layout_editor_absoluteY="1dp">
+
+        <Button
+            android:id="@+id/main_buttonTwitter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            android:text="Twitter" />
+
+        <Button
+            android:id="@+id/main_buttonGithub"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            android:text="Github" />
+    </LinearLayout>
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

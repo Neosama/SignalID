@@ -25,6 +25,7 @@ import androidx.core.content.ContextCompat;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
@@ -34,37 +35,13 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.tortillum.salome.detector.ALIS;
-import com.tortillum.salome.detector.APRS;
-import com.tortillum.salome.detector.ASCII;
-import com.tortillum.salome.detector.ATIS;
-import com.tortillum.salome.detector.CHIP64;
-import com.tortillum.salome.detector.CIS36_50;
-import com.tortillum.salome.detector.CIS40_5;
-import com.tortillum.salome.detector.CIS50_50;
-import com.tortillum.salome.detector.Codan8580;
-import com.tortillum.salome.detector.DSTAR;
-import com.tortillum.salome.detector.FLEX;
-import com.tortillum.salome.detector.FT4;
-import com.tortillum.salome.detector.FT8;
-import com.tortillum.salome.detector.Funcube1;
-import com.tortillum.salome.detector.G_TOR;
-import com.tortillum.salome.detector.InmarsatAero;
-import com.tortillum.salome.detector.Link11;
-import com.tortillum.salome.detector.POCSAG;
-import com.tortillum.salome.detector.PSK;
-import com.tortillum.salome.detector.PactorI;
-import com.tortillum.salome.detector.RTTY;
-import com.tortillum.salome.detector.STANAG;
-import com.tortillum.salome.detector.Tetrapol;
-import com.tortillum.salome.detector.WEFAX;
-import com.tortillum.salome.detector.x2G_ALE;
-import com.tortillum.salome.detector.x3G_ALE;
-import com.tortillum.salome.salome.Pair;
-import com.tortillum.salome.wavReader.Reader;
-import com.tortillum.salome.window.Hamming;
-
-import org.jtransforms.fft.DoubleFFT_1D;
+import com.github.angads25.filepicker.controller.DialogSelectionListener;
+import com.github.angads25.filepicker.model.DialogConfigs;
+import com.github.angads25.filepicker.model.DialogProperties;
+import com.github.angads25.filepicker.view.FilePickerDialog;
+import com.tortillum.salome.recognizer.Recognizer;
+import com.tortillum.salome.signal.INFO_SIGNAL;
+import com.tortillum.salome.wavsplitter.WavFileException;
 
 import java.io.File;
 import java.io.IOException;
@@ -87,7 +64,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Manifest.permission.RECORD_AUDIO, Manifest.permission.WRITE_EXTERNAL_STORAGE};
 
     private String[] informations = new String[]{
-            "Press the big button to start recognition.",
+            "Press the big button to start recognition with microphone.",
+            "Press the little button to start recognition with a WAV file.",
             "Press the \"+\" button for more help.",
             "Press the \"+\" button to get a list of all recognized signals.",
             "Adjust the receiver. (frequency, bandwith)"};
@@ -95,16 +73,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private boolean permissionsOk = false;
 
     RecordManager recordManager;
+
+    String pathSelectFile = "";
     String pathFileTmp;
 
     ImageButton mImageButtonPlus;
     TextView mTextViewInfo;
     ImageButton mImageButtonSearch;
+    ImageButton mImageButtonSearchFromFile;
     TextView mTextViewResult;
     Button mButtonRangeFq;
+    Button mButtonTwitter;
+    Button mButtonGithub;
 
     boolean isHF = true;
     boolean animateActionButton = false;
+    boolean inRecord = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -115,28 +99,36 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         checkPermissions();
 
-        File file = new File(this.getCacheDir(), "tmpSignalID.wav");
+        File file = new File(this.getCacheDir(), "record_tmpSignalID.wav");
         pathFileTmp = file.getAbsolutePath();
-        recordManager = new RecordManager(pathFileTmp);
 
         // Link UI
         mImageButtonPlus = findViewById(R.id.main_imageButtonPlus);
         mTextViewInfo = findViewById(R.id.main_textViewInfo);
         mImageButtonSearch = findViewById(R.id.main_imageButtonSearch);
+        mImageButtonSearchFromFile = findViewById(R.id.main_imageButtonSearchFromFile);
         mTextViewResult = findViewById(R.id.main_textViewResult);
         mButtonRangeFq = findViewById(R.id.main_buttonRangeFq);
+        mButtonTwitter = findViewById(R.id.main_buttonTwitter);
+        mButtonGithub = findViewById(R.id.main_buttonGithub);
 
         mImageButtonPlus.setOnClickListener(this);
         mImageButtonSearch.setOnClickListener(this);
+        mImageButtonSearchFromFile.setOnClickListener(this);
         mButtonRangeFq.setOnClickListener(this);
+        mButtonTwitter.setOnClickListener(this);
+        mButtonGithub.setOnClickListener(this);
 
         checkPermissions();
 
-        if(!permissionsOk){
+        if (!permissionsOk) {
             mImageButtonSearch.setClickable(false);
+            mImageButtonSearchFromFile.setClickable(false);
             mTextViewInfo.setText("Permissions required to use this application, please check.");
-        } else
+        } else {
             mImageButtonSearch.setClickable(true);
+            mImageButtonSearchFromFile.setClickable(true);
+        }
 
         final Handler handlerButtonDance = new Handler();
         final Runnable rButtonDance = new Runnable() {
@@ -170,13 +162,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Random rand = new Random();
                 int n = rand.nextInt(informations.length);
 
-                if(!mTextViewInfo.getText().toString().contains("Searching"))
+                if (!mTextViewInfo.getText().toString().contentEquals("Recording") && !mTextViewInfo.getText().toString().contentEquals("Searching"))
                     mTextViewInfo.setText(informations[n]);
 
-                handlerInformations.postDelayed(this, 8000);
+                handlerInformations.postDelayed(this, 10000);
             }
         };
-        handlerInformations.postDelayed(rInformations, 8000);
+        handlerInformations.postDelayed(rInformations, 10000);
     }
 
     @Override
@@ -187,270 +179,90 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 startActivity(myIntent);
                 break;
             case R.id.main_imageButtonSearch:
-                mTextViewInfo.setText("Searching");
-                mTextViewResult.setText("");
-                new File(pathFileTmp).delete();
-                recordManager = new RecordManager(pathFileTmp);
-                recordManager.start();
+                if (!inRecord && !mTextViewInfo.getText().toString().contentEquals("Searching")) {
+                    inRecord = true;
+                    mTextViewInfo.setText("Recording");
+                    mTextViewResult.setText("");
+                    new File(pathFileTmp).delete();
+                    recordManager = new RecordManager(pathFileTmp);
+                    recordManager.start();
 
-                mImageButtonSearch.setClickable(false);
-                mButtonRangeFq.setClickable(false);
-                mImageButtonPlus.setClickable(false);
-                animateActionButton = true;
+                    mImageButtonSearch.setClickable(false);
+                    mImageButtonSearchFromFile.setClickable(false);
+                    mButtonRangeFq.setClickable(false);
+                    mImageButtonPlus.setClickable(false);
+                    animateActionButton = true;
 
-                // Max time record file ====> 5sec
-                Handler handler = new Handler();
-                Runnable r = new Runnable() {
-                    public void run() {
-                        recordManager.stop();
-
-                        // ======
-
-                        Reader wavReader = null;
-                        try {
-                            wavReader = new Reader(pathFileTmp, false);
-                        } catch (IOException e) {
-                            e.printStackTrace();
+                    // MIN time record file => 5 seconds
+                    Handler handler = new Handler();
+                    Runnable r = new Runnable() {
+                        public void run() {
+                            mImageButtonSearch.setClickable(true);
+                            mImageButtonSearchFromFile.setClickable(true);
+                            mButtonRangeFq.setClickable(true);
+                            mImageButtonPlus.setClickable(true);
                         }
+                    };
+                    handler.postDelayed(r, 5010);
 
-                        double[] pcmData = wavReader.getByteArray();
-
-                        double[] tmp_pcmData = pcmData;
-
-                        int n_fft_65536 = 1024 * 64; // 65536
-
-                        if (tmp_pcmData.length < n_fft_65536) {
-                            return;
+                    // MAX time record file => 30 seconds
+                    Handler handlerTimeout = new Handler();
+                    Runnable r2 = new Runnable() {
+                        public void run() {
+                            mImageButtonSearch.setClickable(true);
+                            mImageButtonSearchFromFile.setClickable(true);
+                            mButtonRangeFq.setClickable(true);
+                            mImageButtonPlus.setClickable(true);
+                            mImageButtonSearch.performClick();
                         }
+                    };
+                    handlerTimeout.postDelayed(r2, 29900);
 
-                        Hamming windowHamming_65536 = new Hamming();
-                        double[] hammingData_65536 = windowHamming_65536.toHammingWindow(tmp_pcmData, tmp_pcmData.length);
+                } else {
+                    inRecord = false;
+                    animateActionButton = false;
+                    recordManager.stop();
+                    mTextViewInfo.setText(informations[0]);
 
-                        DoubleFFT_1D fft_fsk = new DoubleFFT_1D(n_fft_65536);
-                        fft_fsk.realForward(hammingData_65536);
+                    // Run SALOME algorithm
+                    System.out.println("Run SALOME algorithm (MIC)");
+                    mTextViewInfo.setText("Searching");
+                    RecognizerThreadMic tRecognizer = new RecognizerThreadMic();
+                    tRecognizer.start();
+                }
+                break;
+            case R.id.main_imageButtonSearchFromFile:
+                if(!mTextViewInfo.getText().toString().contentEquals("Recording")) {
+                    mTextViewResult.setText("");
+                    DialogProperties properties = new DialogProperties();
+                    properties.selection_mode = DialogConfigs.SINGLE_MODE;
+                    properties.selection_type = DialogConfigs.FILE_SELECT;
+                    properties.root = new File(DialogConfigs.DEFAULT_DIR);
+                    properties.error_dir = new File(DialogConfigs.DEFAULT_DIR);
+                    properties.offset = new File(DialogConfigs.DEFAULT_DIR);
+                    properties.extensions = null;
 
-                        // Extract Real part
-                        double[] result_65536 = new double[hammingData_65536.length / 2];
-                        for (int s = 0; s < result_65536.length; s++) {
-                            //result[s] = Math.abs(signal[2*s]);
-                            double re = hammingData_65536[s * 2];
-                            double im = hammingData_65536[s * 2 + 1];
-                            result_65536[s] = (double) Math.sqrt(re * re + im * im) / result_65536.length;
+                    FilePickerDialog dialog = new FilePickerDialog(MainActivity.this, properties);
+                    dialog.setTitle("Select a WAV File");
+
+                    dialog.setDialogSelectionListener(new DialogSelectionListener() {
+                        @Override
+                        public void onSelectedFilePaths(String[] files) {
+                            if (files[0].toLowerCase().contains(".wav")) {
+                                pathSelectFile = files[0];
+                                System.out.println("Run SALOME algorithm (FILE)");
+                                mTextViewInfo.setText("Searching");
+                                mImageButtonSearch.setClickable(false);
+                                mImageButtonSearchFromFile.setClickable(false);
+                                RecognizerThreadFile tRecognizer = new RecognizerThreadFile();
+                                tRecognizer.start();
+                            } else
+                                mTextViewResult.setText("Select a WAV file");
                         }
+                    });
 
-                        // frequency  = index * SamplingFrequency / N_FFT
-
-                        Pair[] frequenciesArray_65536 = new Pair[result_65536.length];
-
-                        //fill the array
-                        for (int i = 0; i < result_65536.length; i++) {
-                            frequenciesArray_65536[i] = new Pair(i, result_65536[i]);
-                        }
-                        Arrays.sort(frequenciesArray_65536);
-
-                        // @@@@@@
-                        RTTY rtty_test = new RTTY((int) wavReader.getSR(), n_fft_65536, frequenciesArray_65536);
-                        PactorI pactorI_test = new PactorI((int) wavReader.getSR(), n_fft_65536, frequenciesArray_65536);
-                        ASCII ascii_test = new ASCII((int) wavReader.getSR(), n_fft_65536, frequenciesArray_65536);
-                        ALIS alis_test = new ALIS((int) wavReader.getSR(), n_fft_65536, frequenciesArray_65536);
-                        Codan8580 codan8580_test = new Codan8580((int) wavReader.getSR(), n_fft_65536, frequenciesArray_65536);
-                        CIS36_50 cis36_50_test = new CIS36_50((int) wavReader.getSR(), n_fft_65536, frequenciesArray_65536);
-                        CIS40_5 cis40_5_test = new CIS40_5((int) wavReader.getSR(), n_fft_65536, frequenciesArray_65536);
-                        CIS50_50 cis50_50_test = new CIS50_50((int) wavReader.getSR(), n_fft_65536, frequenciesArray_65536);
-                        STANAG stanag_test = new STANAG((int) wavReader.getSR(), n_fft_65536, frequenciesArray_65536);
-                        FT4 ft4_test = new FT4((int) wavReader.getSR(), n_fft_65536, frequenciesArray_65536);
-                        FT8 ft8_test = new FT8((int) wavReader.getSR(), n_fft_65536, frequenciesArray_65536);
-                        WEFAX wefax_test = new WEFAX((int) wavReader.getSR(), n_fft_65536, frequenciesArray_65536);
-                        x2G_ALE x2G_ale_test = new x2G_ALE((int) wavReader.getSR(), n_fft_65536, frequenciesArray_65536);
-                        x3G_ALE x3G_ale_test = new x3G_ALE((int) wavReader.getSR(), n_fft_65536, frequenciesArray_65536);
-                        CHIP64 chip64_test = new CHIP64((int) wavReader.getSR(), n_fft_65536, frequenciesArray_65536);
-                        APRS aprs_test = new APRS((int) wavReader.getSR(), n_fft_65536, frequenciesArray_65536);
-                        ATIS atis_test = new ATIS((int) wavReader.getSR(), n_fft_65536, frequenciesArray_65536);
-                        Tetrapol tetrapol_test = new Tetrapol((int) wavReader.getSR(), n_fft_65536, frequenciesArray_65536);
-                        POCSAG pocsag_test = new POCSAG((int) wavReader.getSR(), n_fft_65536, frequenciesArray_65536);
-                        FLEX flex_test = new FLEX((int) wavReader.getSR(), n_fft_65536, frequenciesArray_65536);
-                        PSK psk_test = new PSK((int) wavReader.getSR(), n_fft_65536, frequenciesArray_65536);
-                        Link11 link11_test = new Link11((int) wavReader.getSR(), n_fft_65536, frequenciesArray_65536);
-                        Funcube1 funcube1_test = new Funcube1((int) wavReader.getSR(), n_fft_65536, frequenciesArray_65536);
-                        InmarsatAero inmarsatAero_test = new InmarsatAero((int) wavReader.getSR(), n_fft_65536, frequenciesArray_65536);
-                        DSTAR dstar_test = new DSTAR((int) wavReader.getSR(), n_fft_65536, frequenciesArray_65536);
-                        G_TOR g_tor_test = new G_TOR((int) wavReader.getSR(), n_fft_65536, frequenciesArray_65536);
-
-                        if (isHF) { // 0-30 MHz
-                            // RTTY
-                            if (rtty_test.isCommercial85Hz())
-                                mTextViewResult.setText("RTTY (Commercial 85Hz) detected!");
-                            if (rtty_test.isCommercial170Hz())
-                                mTextViewResult.setText("RTTY (Commercial 170Hz) detected!");
-                            if (rtty_test.isCommercial450Hz())
-                                mTextViewResult.setText("RTTY (Commercial 450Hz) detected!");
-                            if (rtty_test.isCommercial850Hz())
-                                mTextViewResult.setText("RTTY (Commercial 850Hz) detected!");
-                            if (rtty_test.isAmateurs170Hz())
-                                mTextViewResult.setText("RTTY (Amateur 170Hz) detected!");
-
-                            // Pactor I
-                            if (pactorI_test.isStandard())
-                                mTextViewResult.setText("Pactor I (Standard) detected!");
-                            if (pactorI_test.isFSP())
-                                mTextViewResult.setText("Pactor I (FSP) detected!");
-                            if (pactorI_test.isFEC())
-                                mTextViewResult.setText("Pactor I (FEC) detected!");
-                            if (pactorI_test.isSELCALL())
-                                mTextViewResult.setText("Pactor I (SELCALL) detected!");
-
-                            // ASCII
-                            if (ascii_test.is170Hz())
-                                mTextViewResult.setText("ASCII (170Hz) detected!");
-
-                            // ALIS
-                            if (alis_test.isALIS())
-                                mTextViewResult.setText("ALIS detected!");
-
-                            // Codan 8580
-                            if (codan8580_test.isCodan8580())
-                                mTextViewResult.setText("Codan 8580 detected!");
-
-                            // CIS 36_50
-                            if (cis36_50_test.is200Hz())
-                                mTextViewResult.setText("CIS36_50 (200Hz) detected!");
-                            if (cis36_50_test.is250Hz())
-                                mTextViewResult.setText("CIS36_50 (250Hz) detected!");
-
-
-                            // CIS 40_5
-                            if (cis40_5_test.isCIS40_5())
-                                mTextViewResult.setText("CIS40_5 detected!");
-
-                            // CIS 50_50
-                            if (cis50_50_test.is500Hz())
-                                mTextViewResult.setText("CIS50_50 (500Hz) detected!");
-
-                            // STANAG
-                            if (stanag_test.is4285_GEN())
-                                mTextViewResult.setText("STANAG 4285 (GEN) detected!");
-                            if (stanag_test.is4285_SYS3000_FEC())
-                                mTextViewResult.setText("STANAG 4285 (SYS3000 FEC) detected!");
-                            if (stanag_test.is4285_8PSK())
-                                mTextViewResult.setText("STANAG 4285 (8PSK) detected!");
-                            if (stanag_test.is4285_TFC())
-                                mTextViewResult.setText("STANAG 4285 (TFC) detected!");
-                            if (stanag_test.is4285_IDLE())
-                                mTextViewResult.setText("STANAG 4285 (IDLE) detected!");
-                            if (stanag_test.is4285_SYS3000())
-                                mTextViewResult.setText("STANAG 4285 (SYS3000) detected!");
-
-                            // FT4
-                            if (ft4_test.isFT4())
-                                mTextViewResult.setText("FT4 detected!");
-
-                            // FT8
-                            if (ft8_test.isFT8())
-                                mTextViewResult.setText("FT8 detected!");
-
-                            // WEFAX
-                            if (wefax_test.is120())
-                                mTextViewResult.setText("WEFAX (120) detected!");
-                            if (wefax_test.is240())
-                                mTextViewResult.setText("WEFAX (240) detected!");
-
-                            // 2G ALE
-                            if (x2G_ale_test.is2G_ALE())
-                                mTextViewResult.setText("2G ALE detected!");
-
-                            // 3G ALE
-                            if (x3G_ale_test.is3G_ALE())
-                                mTextViewResult.setText("3G ALE detected!");
-
-                            // CHIP64
-                            if (chip64_test.isCHIP64())
-                                mTextViewResult.setText("CHIP64 detected!");
-
-                            // LINK-11
-                            if(link11_test.isCLEW())
-                                mTextViewResult.setText("LINK-11 (CLEW) detected!");
-                            if(link11_test.isSLEW())
-                                mTextViewResult.setText("LINK-11 (SLEW) detected!");
-                            if(link11_test.isGenCLEW())
-                                mTextViewResult.setText("LINK-11 (GEN/CLEW) detected!");
-
-                            // G-TOR
-                            if(g_tor_test.is100())
-                                mTextViewResult.setText("G-TOR (100 bd) detected!");
-                            if(g_tor_test.is200())
-                                mTextViewResult.setText("G-TOR (200 bd) detected!");
-                            if(g_tor_test.is300())
-                                mTextViewResult.setText("G-TOR (300 bd) detected!");
-
-                        } else { // 30 - INFINITE MHz
-                            // APRS
-                            if (aprs_test.isAPRS())
-                                mTextViewResult.setText("APRS detected!");
-
-                            // ATIS
-                            if (atis_test.isBurst())
-                                mTextViewResult.setText("ATIS (Burst) detected!");
-
-                            // TETRAPOL
-                            if (tetrapol_test.isTetrapol())
-                                mTextViewResult.setText("TETRAPOL detected!");
-
-                            // POCSAG
-                            if (pocsag_test.isPOCSAG())
-                                mTextViewResult.setText("POCSAG detected!");
-
-                            // FLEX
-                            if (flex_test.is2FSK())
-                                mTextViewResult.setText("FLEX (2FSK) detected!");
-
-                            // Funcube-1
-                            if(funcube1_test.isFuncube1())
-                                mTextViewResult.setText("Funcube-1 telemetry detected!");
-
-                            // Inmersat_Aero
-                            if(inmarsatAero_test.is10_5())
-                                mTextViewResult.setText("Inmersat Aero (10.5 kbps) detected!");
-                            if(inmarsatAero_test.is600())
-                                mTextViewResult.setText("Inmersat Aero (600 bps) detected!");
-
-                            // DSTAR
-                            if(dstar_test.isDSTAR())
-                                mTextViewResult.setText("DSTAR detected!");
-                        }
-
-                        // ======================
-                        // 0-30 & 30-INFINITE MHz
-                        // ======================
-
-                        // PSK (31, 63, 125, 250, 500)
-                        if (psk_test.isBPSK_31() || psk_test.isQPSK_31())
-                            mTextViewResult.setText("PSK31 detected!");
-                        if (psk_test.isBPSK_63() || psk_test.isQPSK_63())
-                            mTextViewResult.setText("PSK63 detected!");
-                        if (psk_test.isBPSK_125() || psk_test.isQPSK_125())
-                            mTextViewResult.setText("PSK125 detected!");
-                        if (psk_test.isBPSK_250() || psk_test.isQPSK_250())
-                            mTextViewResult.setText("PSK250 detected!");
-                        if (psk_test.isBPSK_500() || psk_test.isQPSK_500())
-                            mTextViewResult.setText("PSK500 detected!");
-
-                        // @@@@@@
-
-                        if (!mTextViewResult.getText().toString().contains("!")) {
-                            mTextViewResult.setText("UNKNOWN");
-                        }
-
-                        // ======
-                        mImageButtonSearch.setClickable(true);
-                        mButtonRangeFq.setClickable(true);
-                        mImageButtonPlus.setClickable(true);
-                        animateActionButton = false;
-                        mTextViewInfo.setText(informations[0]);
-                    }
-                };
-                handler.postDelayed(r, 5010);
-
-                // ======
+                    dialog.show();
+                }
 
                 break;
             case R.id.main_buttonRangeFq:
@@ -463,6 +275,68 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
 
                 break;
+            case R.id.main_buttonTwitter:
+                Intent browserIntentTwitter = new Intent(Intent.ACTION_VIEW, Uri.parse("https://twitter.com/tortillum"));
+                startActivity(browserIntentTwitter);
+                break;
+            case R.id.main_buttonGithub:
+                Intent browserIntentGithub = new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/Neosama/SignalID"));
+                startActivity(browserIntentGithub);
+                break;
+        }
+    }
+
+    public class RecognizerThreadMic extends Thread {
+        public RecognizerThreadMic(){
+            super();
+        }
+        public void run(){
+            try {
+                int typeFrequencies;
+                if (isHF)
+                    typeFrequencies = INFO_SIGNAL.TYPE_FREQUENCIES_L30;
+                else
+                    typeFrequencies = INFO_SIGNAL.TYPE_FREQUENCIES_M30;
+                final Recognizer recognizer = new Recognizer(MainActivity.this, pathFileTmp, INFO_SIGNAL.TYPE_MODE_USB, typeFrequencies, false);
+
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mTextViewResult.setText(recognizer.getResult());
+                        mTextViewInfo.setText(informations[0]);
+                    }
+                });
+            } catch (IOException | WavFileException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public class RecognizerThreadFile extends Thread {
+        public RecognizerThreadFile(){
+            super();
+        }
+        public void run(){
+            try {
+                int typeFrequencies;
+                if (isHF)
+                    typeFrequencies = INFO_SIGNAL.TYPE_FREQUENCIES_L30;
+                else
+                    typeFrequencies = INFO_SIGNAL.TYPE_FREQUENCIES_M30;
+                final Recognizer recognizer = new Recognizer(MainActivity.this, pathSelectFile, INFO_SIGNAL.TYPE_MODE_USB, typeFrequencies, false);
+
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mTextViewResult.setText(recognizer.getResult());
+                        mTextViewInfo.setText(informations[0]);
+                        mImageButtonSearch.setClickable(true);
+                        mImageButtonSearchFromFile.setClickable(true);
+                    }
+                });
+            } catch (IOException | WavFileException e) {
+                e.printStackTrace();
+            }
         }
     }
 

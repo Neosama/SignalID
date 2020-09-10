@@ -39,43 +39,23 @@ public class PlusActivity extends AppCompatActivity implements View.OnClickListe
             "Selecting the frequency range. (0-30 MHz / Other)\n" +
             "Place the microphone of the device near the loudspeaker. (The quieter the environment is around, the fewer errors will occur)\n" +
             "Press the big button that dances.\n" +
-            "Wait 5 seconds. (Time required for record)\n" +
-            "\n" +
+            "Wait 5 seconds. (minimum time required for recognition)\n" +
+            "But the optimal and maximum time is 30 seconds.\n\n" +
             "Tips :\n" +
             "The algorithm is based on frequency, a wrong tuning of your radio/SDR will result in an erroneous detection.\n" +
-            "The recording is limited to 5 seconds, for practical reasons. Recognition of a signal may require several attempts.";
-    private String str_Credit = "SignalID v1.2\n" +
+            "The recording is limited to 30 seconds, for practical reasons. Recognition of a signal may require several attempts.\n" +
+            "Only WAV files with a sampling rate of 44100 Hz are compatible.\n" +
+            "Several sites allow you to convert audio files, use them to get the adequate format if you don't have it.\n";
+    private String str_Credit = "SignalID v2\n" +
             "By Tortillum.\n" +
-            "Now open source !\n" +
+            "Now open source ! (GPLv3)\n" +
             "\n" +
-            "Follow us on Twitter : @tortillum\n";
+            "Follow us on Twitter : @tortillum @Rafios06\n";
     private String str_Signals = "The complete list of recognized signals :\n\n" +
             "RTTY (Commercial 85Hz, 170Hz, 450Hz, 850Hz, Amateur 170Hz)\n" +
-            "PactorI (Standard, FSP, FEC, SELCALL)\n" +
-            "ASCII (170Hz)\n" +
-            "ALIS\n" +
-            "Codan8580 (200Hz, 250Hz)\n" +
-            "CIS36_50\n" +
-            "CIS40_5\n" +
-            "CIS50_50\n" +
             "STANAG 4285 (GEN, SYS3000 FEC, 8PSK, TFC, IDLE, SYS3000)\n" +
             "FT4\n" +
-            "FT8\n" +
-            "WEFAX (120, 240)\n" +
-            "2G ALE\n" +
-            "3G ALE\n" +
-            "CHIP64\n" +
-            "APRS (Burst)\n" +
-            "ATIS\n" +
-            "Tetrapol\n" +
-            "POCSAG\n" +
-            "FLEX (2FSK)\n" +
-            "LINK-11 (GEN-CLEW, CLEW, SLEW)\n" +
-            "Funcube-1 Telemetry\n" +
-            "Inmarsat Aero TDM (10.5 kbps, 600 bps)\n" +
-            "DSTAR\n" +
-            "G-TOR (100 bd, 200 bd, 300 bd)\n" +
-            "PSK (31, 63, 125, 250, 500)";
+            "FT8";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
